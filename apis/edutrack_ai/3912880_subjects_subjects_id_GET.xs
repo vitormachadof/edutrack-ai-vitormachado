@@ -1,27 +1,29 @@
-// Get subjects record
-query "subjects/{subjects_id}" verb=GET {
+// Get a subject record owned by the authenticated user
+query "subjects/{subject_id}" verb=GET {
   api_group = "edutrack-ai"
+  description = "Retrieve a specific subject owned by the authenticated user"
+  auth = "user"
 
   input {
-    int subjects_id? filters=min:1
+    int subject_id? filters=min:1
   }
 
   stack {
-    db.get "" {
+    db.get subject {
       field_name = "id"
-      field_value = $input.subjects_id
-    } as $subjects
-  
-    precondition ($subjects != null) {
+      field_value = $input.subject_id
+    } as $subject
+
+    precondition ($subject != null) {
       error_type = "notfound"
       error = "Not Found."
     }
-  
-    precondition () {
-      error_type = "forbidden"
-      error = "You do not have permission to access this subject."
+
+    precondition ($subject.user_id == $auth.id) {
+      error_type = "accessdenied"
+      error = "Forbidden."
     }
   }
 
-  response = $subjects
+  response = $subject
 }

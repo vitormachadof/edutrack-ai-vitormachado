@@ -1,30 +1,32 @@
-// Delete subjects record.
-query "subjects/{subjects_id}" verb=DELETE {
+// Delete a subject record owned by the authenticated user
+// Delete a specific subject owned by the authenticated user
+query "subjects/{subject_id}" verb=DELETE {
   api_group = "edutrack-ai"
+  auth = "user"
 
   input {
-    int subjects_id? filters=min:1
+    int subject_id? filters=min:1
   }
 
   stack {
-    db.get "" {
+    db.get subject {
       field_name = "id"
-      field_value = $input.subjects_id
+      field_value = $input.subject_id
     } as $subject
   
     precondition ($subject != null) {
       error_type = "notfound"
-      error = "Subject not found."
+      error = "Not Found."
     }
   
-    precondition () {
-      error_type = "forbidden"
-      error = "You do not have permission to delete this subject."
+    precondition ($subject.user_id == $auth.id) {
+      error_type = "accessdenied"
+      error = "Forbidden."
     }
   
-    db.del "" {
+    db.del subject {
       field_name = "id"
-      field_value = $input.subjects_id
+      field_value = $input.subject_id
     }
   }
 
