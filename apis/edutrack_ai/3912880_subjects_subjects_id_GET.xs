@@ -16,6 +16,11 @@ query "subjects/{subjects_id}" verb=GET {
       error_type = "notfound"
       error = "Not Found."
     }
+  
+    precondition () {
+      error_type = "forbidden"
+      error = "You do not have permission to access this subject."
+    }
   }
 
   response = $subjects
