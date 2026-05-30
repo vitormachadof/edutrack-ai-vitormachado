@@ -4,12 +4,29 @@ query "subjects/{subjects_id}" verb=PATCH {
 
   input {
     int subjects_id? filters=min:1
-    dblink {
-      table = ""
-    }
+    text name?
+    text description?
+    int credits?
+    text semester?
+    text status?
   }
 
   stack {
+    db.get "" {
+      field_name = "id"
+      field_value = $input.subjects_id
+    } as $subject
+  
+    precondition ($subject != null) {
+      error_type = "notfound"
+      error = "Subject not found."
+    }
+  
+    precondition () {
+      error_type = "forbidden"
+      error = "You do not have permission to modify this subject."
+    }
+  
     util.get_raw_input {
       encoding = "json"
       exclude_middleware = false
@@ -18,7 +35,14 @@ query "subjects/{subjects_id}" verb=PATCH {
     db.patch "" {
       field_name = "id"
       field_value = $input.subjects_id
-      data = `$input|pick:($raw_input|keys)`|filter_null|filter_empty_text
+      data = {
+        name       : $input.name
+        description: $input.description
+        credits    : $input.credits
+        semester   : $input.semester
+        status     : $input.status
+        updated_at : "now"
+      }
     } as $subjects
   }
 

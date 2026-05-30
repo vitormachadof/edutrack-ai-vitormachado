@@ -7,6 +7,21 @@ query "subjects/{subjects_id}" verb=DELETE {
   }
 
   stack {
+    db.get "" {
+      field_name = "id"
+      field_value = $input.subjects_id
+    } as $subject
+  
+    precondition ($subject != null) {
+      error_type = "notfound"
+      error = "Subject not found."
+    }
+  
+    precondition () {
+      error_type = "forbidden"
+      error = "You do not have permission to delete this subject."
+    }
+  
     db.del "" {
       field_name = "id"
       field_value = $input.subjects_id
