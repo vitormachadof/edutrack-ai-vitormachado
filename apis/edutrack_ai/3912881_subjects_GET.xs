@@ -1,7 +1,7 @@
 // Query subjects owned by the authenticated user
+// List subjects belonging to the authenticated user
 query subjects verb=GET {
   api_group = "edutrack-ai"
-  description = "List subjects belonging to the authenticated user"
   auth = "user"
 
   input {
